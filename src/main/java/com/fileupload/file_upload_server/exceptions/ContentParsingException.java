@@ -3,7 +3,7 @@ package com.fileupload.file_upload_server.exceptions;
 /**
  * The Class FileUploadException.
  */
-public class FileUploadException extends Exception {
+public class ContentParsingException extends Exception {
 
 	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
@@ -13,7 +13,7 @@ public class FileUploadException extends Exception {
 	 *
 	 * @param msg the msg
 	 */
-	public FileUploadException(String msg) {
+	public ContentParsingException(String msg) {
 		super(msg);
 	}
 
