@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,6 @@ import com.fileupload.file_upload_server.properties.IConfigProperties;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.Return;
-import com.rabbitmq.client.ReturnCallback;
 
 /**
  * The Class ContentProcessorService.
@@ -78,29 +77,25 @@ public class ContentProcessorService implements IService {
 
 			@Override
 			public void run() {
+				Channel channel =null;
 				try {
 					Connection connection = connectionManager.getConnection();
-					Channel channel = connection.createChannel();
+					channel= connection.createChannel();
 					String exchange = configProperties.getExchange();
 					channel.exchangeDeclare(exchange, BuiltinExchangeType.FANOUT);
 					String routingKey = RandomStringUtils.randomAlphanumeric(5);
 					channel.queueDeclare(routingKey, false, false, false, null);
-					channel.addReturnListener(new ReturnCallback() {
-
-						@Override
-						public void handle(Return returnMessage) {
-							System.out.println("Returned:" + returnMessage);
-						}
-					});
 					for (IMessage record : records) {
 						String serialized = record.toString();
-						System.out.println(serialized);
 						channel.basicPublish(exchange, routingKey, null, serialized.getBytes());
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
 					connectionManager.closeConnection();
 				} finally {
+					try {
+						channel.close();
+					} catch (IOException | TimeoutException e) {
+					}
 				}
 			}
 		});
