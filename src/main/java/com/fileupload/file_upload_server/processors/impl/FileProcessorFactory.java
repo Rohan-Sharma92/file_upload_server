@@ -14,6 +14,8 @@ public class FileProcessorFactory implements IFileProcessorFactory {
 		switch(fileType) {
 		case CSV:
 			return new CSVFileProcessor();
+		case PLAIN:
+			return new TextFileProcessor();
 		default:
 			return null;
 		}

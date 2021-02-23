@@ -1,0 +1,34 @@
+In this post, I have tried to understand the publish/subscribe protocol for queues in RabbitMQ. In this example, I have tried to develop a service to manage log ingestion in distributed systems.
+Talk about publish/subscribe protocol and exchanges, queues etc.
+I have developed a REST service through which log files (currently CSV formatted) will be uploaded by the clients, which will then be parsed and published to Rabbit MQ server. This could then be utilized for analysis and extraction of vital information through multiple downstream consumers. Following is the architecture of it :
+
+
+1. REST API:
+-------------------
+
+A '${url}/process' API is exposed which accepts multi-part file uploads in its parameters. Upon successful upload, the service replies OK to the client and processes the file aynschronously.
+
+2. File Upload Service:
+--------------------
+
+A) Parsing of files
+The received files are then parsed and serialised for publication. There are different parsing engines based on file type specified such as CSV etc.
+The processed files are then transferred to a complete directory.
+
+B) Publishing messages
+--------------------
+
+The publication of messages is managed via an exchange in RabbitMQ. We will be publishing an exchange based on the file type we are parsing.
+An exchange can be understood as an identifier for message publication between RabbitMQ and our server. For publishing out a consistent stream of messages, a channel needs to be created everytime we need to send out a message for a specified exchange.
+In our application, we have maintained a pool of worker threads to carry out this processing, which means that for every file read, an exchange will be published first if not already done. For sending out parsed messages, each worker will create a channel first and then publish messages using that channel. These channels can be frequently opened/closed for every new file we receive to send out.
+Following is extract of messages sent out:
+
+Talk about fan out, exchange declare
+
+
+
+Tracing
+-----------------------
+
+As provided in my earlier post, I have included tracing plugin to record and understand message published over to RabbitMQ server.
+Add screenshots of tracing

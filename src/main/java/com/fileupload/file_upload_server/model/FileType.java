@@ -6,5 +6,5 @@ package com.fileupload.file_upload_server.model;
 public enum FileType {
 
 	/** The csv. */
-	CSV
+	CSV, PLAIN
 }

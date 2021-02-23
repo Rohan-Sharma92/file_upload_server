@@ -24,14 +24,6 @@ public class CSVMessage implements IMessage {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.fileupload.file_upload_server.model.IMessage#getContents()
-	 */
-	@Override
-	public Map<String, String> getContents() {
-		return content;
-	}
-
-	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

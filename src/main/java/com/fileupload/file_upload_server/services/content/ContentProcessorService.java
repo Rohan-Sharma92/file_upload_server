@@ -3,16 +3,17 @@ package com.fileupload.file_upload_server.services.content;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fileupload.file_upload_server.configuration.TimerTask;
 import com.fileupload.file_upload_server.connection.IConnectionManager;
 import com.fileupload.file_upload_server.exceptions.ContentParsingException;
 import com.fileupload.file_upload_server.model.FileType;
@@ -44,6 +45,8 @@ public class ContentProcessorService implements IService {
 	/** The executor. */
 	private final ExecutorService executor;
 
+	private final Logger logger;
+
 	/**
 	 * Instantiates a new content processor service.
 	 *
@@ -53,11 +56,13 @@ public class ContentProcessorService implements IService {
 	 */
 	@Autowired
 	public ContentProcessorService(final IFileProcessorFactory fileProcessorFactory,
-			final IConnectionManager connectionManager, final IConfigProperties configProperties) {
+			final IConnectionManager connectionManager, final IConfigProperties configProperties,
+			final ExecutorService executor,final Logger logger) {
 		this.fileProcessorFactory = fileProcessorFactory;
 		this.connectionManager = connectionManager;
 		this.configProperties = configProperties;
-		this.executor=Executors.newFixedThreadPool(5);
+		this.executor = executor;
+		this.logger = logger;
 	}
 
 	/* (non-Javadoc)
@@ -73,29 +78,37 @@ public class ContentProcessorService implements IService {
 		} catch (IOException e) {
 			throw new ContentParsingException(e.getMessage());
 		}
+		logger.info("File received: "+file.getOriginalFilename());
+		TimerTask task = new TimerTask(file.getOriginalFilename());
+		task.start();
 		executor.execute(new Runnable() {
 
 			@Override
 			public void run() {
+				task.completeStage("Queued");
 				Channel channel =null;
 				try {
 					Connection connection = connectionManager.getConnection();
 					channel= connection.createChannel();
 					String exchange = configProperties.getExchange();
 					channel.exchangeDeclare(exchange, BuiltinExchangeType.FANOUT);
-					String routingKey = RandomStringUtils.randomAlphanumeric(5);
+					String routingKey = "Rohan";
 					channel.queueDeclare(routingKey, false, false, false, null);
 					for (IMessage record : records) {
 						String serialized = record.toString();
 						channel.basicPublish(exchange, routingKey, null, serialized.getBytes());
 					}
 				} catch (Exception e) {
+					logger.error("Exception encountered: "+e.getMessage());
 					connectionManager.closeConnection();
 				} finally {
 					try {
 						channel.close();
 					} catch (IOException | TimeoutException e) {
+						logger.error("Exception encountered: "+e.getMessage());
 					}
+					logger.info("File transferred: "+file.getOriginalFilename()+"\t"+"Records: "+records.size());
+					task.processingComplete();
 				}
 			}
 		});
