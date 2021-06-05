@@ -9,8 +9,6 @@ public class ConfigProperties implements IConfigProperties {
 	
 	private String connectionURL;
 	
-	private String exchange;
-	
 	@Override
 	public String getUploadDir() {
 		return uploadDir;
@@ -30,15 +28,4 @@ public class ConfigProperties implements IConfigProperties {
 	public void setConnectionURL(String connectionURL) {
 		this.connectionURL = connectionURL;
 	}
-
-	@Override
-	public String getExchange() {
-		return exchange;
-	}
-
-	@Override
-	public void setExchange(String exchange) {
-		this.exchange = exchange;
-	}
-
 }

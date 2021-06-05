@@ -14,8 +14,9 @@ public interface IService {
 	 * Process.
 	 *
 	 * @param file the file
+	 * @param fileType 
 	 * @return the string
 	 * @throws ContentParsingException the content parsing exception
 	 */
-	public String process(MultipartFile file) throws ContentParsingException;
+	public String process(MultipartFile file, String fileType) throws ContentParsingException;
 }

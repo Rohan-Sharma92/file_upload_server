@@ -9,8 +9,4 @@ public interface IConfigProperties {
 	String getConnectionURL();
 
 	void setConnectionURL(String connectionURL);
-
-	void setExchange(String exchange);
-
-	String getExchange();
 }

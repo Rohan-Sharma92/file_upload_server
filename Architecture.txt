@@ -21,9 +21,7 @@ B) Publishing messages
 The publication of messages is managed via an exchange in RabbitMQ. We will be publishing an exchange based on the file type we are parsing.
 An exchange can be understood as an identifier for message publication between RabbitMQ and our server. For publishing out a consistent stream of messages, a channel needs to be created everytime we need to send out a message for a specified exchange.
 In our application, we have maintained a pool of worker threads to carry out this processing, which means that for every file read, an exchange will be published first if not already done. For sending out parsed messages, each worker will create a channel first and then publish messages using that channel. These channels can be frequently opened/closed for every new file we receive to send out.
-Following is extract of messages sent out:
 
-Talk about fan out, exchange declare
 
 
 

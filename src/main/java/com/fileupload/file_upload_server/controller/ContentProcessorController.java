@@ -39,10 +39,10 @@ public class ContentProcessorController {
 	 * @return the file upload response
 	 */
 	@PostMapping(path = "/process")
-	public FileUploadResponse processFile(@RequestParam("file") MultipartFile file) {
+	public FileUploadResponse processFile(@RequestParam("file") MultipartFile file, @RequestParam("filetype") String fileType) {
 		FileUploadResponse response;
 		try {
-			response = processContent(file);
+			response = processContent(file,fileType);
 		} catch (ContentParsingException e) {
 			response = generateErrorResponse(file, e);
 		}
@@ -53,11 +53,12 @@ public class ContentProcessorController {
 	 * Process content.
 	 *
 	 * @param file the file
+	 * @param fileType 
 	 * @return the file upload response
 	 * @throws ContentParsingException the content parsing exception
 	 */
-	private FileUploadResponse processContent(MultipartFile file) throws ContentParsingException {
-		String fileURL = contentProcessorService.process(file);
+	private FileUploadResponse processContent(MultipartFile file, String fileType) throws ContentParsingException {
+		String fileURL = contentProcessorService.process(file,fileType);
 		FileUploadResponse response = new FileUploadResponse(file.getOriginalFilename(), fileURL,
 				file.getContentType());
 		return response;
